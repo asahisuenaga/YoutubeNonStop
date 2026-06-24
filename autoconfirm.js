@@ -1,12 +1,12 @@
-const tag = '[Youtube NonStop]';
-const isYoutubeMusic = window.location.hostname === 'music.youtube.com';
+const tag = '[YouTube NonStop]';
+const isYouTubeMusic = window.location.hostname === 'music.youtube.com';
 
-const popupEventNodename = isYoutubeMusic ? 'YTMUSIC-YOU-THERE-RENDERER' : 'YT-CONFIRM-DIALOG-RENDERER';
+const popupEventNodename = isYouTubeMusic ? 'YTMUSIC-YOU-THERE-RENDERER' : 'YT-CONFIRM-DIALOG-RENDERER';
 
 const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 let appObserver = null;
-const appName = isYoutubeMusic ? 'ytmusic-app' : 'ytd-app';
-const popupContainer = isYoutubeMusic ? 'ytmusic-popup-container' : 'ytd-popup-container';
+const appName = isYouTubeMusic ? 'ytmusic-app' : 'ytd-app';
+const popupContainer = isYouTubeMusic ? 'ytmusic-popup-container' : 'ytd-popup-container';
 
 let pauseRequested = false;
 let pauseRequestedTimeout;
@@ -105,6 +105,9 @@ function observeApp() {
   });
 }
 
+const unavailableConfirmButtonSelector = 'ytd-watch-flexy[player-unavailable] button[aria-label="I understand and wish to proceed"]';
+const unavailableConfirmIntervalMillis = 2000;
+
 function listenForPopupEvent() {
   debug('Listening for popup event...');
   document.addEventListener('yt-popup-opened', (e) => {
@@ -115,6 +118,13 @@ function listenForPopupEvent() {
       videoElement.play();
     }
   });
+}
+
+function autoConfirmUnavailablePlayer() {
+  const button = document.querySelector(unavailableConfirmButtonSelector);
+  if (!button) return;
+  debug('[auto-confirm unavailable player prompt]');
+  button.click();
 }
 
 function overrideVideoPause() {
@@ -156,5 +166,6 @@ listenForKeyboard();
 
 listenForPopupEvent();
 observeApp();
+setInterval(autoConfirmUnavailablePlayer, unavailableConfirmIntervalMillis);
 
-log(`Monitoring YouTube ${isYoutubeMusic ? 'Music ' : ''}for 'Confirm watching?' action...`);
+log(`Monitoring YouTube ${isYouTubeMusic ? 'Music ' : ''}for 'Confirm watching?' action and unavailable-player prompts...`);
